@@ -1,24 +1,45 @@
+import models.Physician;
+import models.User;
+import repositories.PhysiciansRepository;
+import repositories.UsersRepository;
 import services.HealthcareDatabase;
 
 import java.io.IOException;
+import java.util.UUID;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) throws IOException {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
-
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        try {
+            test1();
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private static void test1() throws IOException {
         HealthcareDatabase db = HealthcareDatabase.GetInstance();
-        db.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database");
+        db.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
         db.load();
+
+        User user1 = new User();
+        user1.setUsername("user1");
+        user1.setPassword("password1");
+        user1.setId(UUID.randomUUID());
+
+        Physician physician1 = new Physician();
+        physician1.setId(UUID.randomUUID());
+        physician1.setName("Anakin");
+        physician1.setSurname("Skywalker");
+        physician1.setTaxCode("SKYNKN81D19L781D");
+        physician1.setUserId(user1.getId());
+
+        UsersRepository usersRepository = new UsersRepository(db);
+        usersRepository.Add(user1.getId(), user1);
+
+        PhysiciansRepository physiciansRepository = new PhysiciansRepository(db);
+        physiciansRepository.Add(physician1.getId(), physician1);
+
         db.save();
     }
 }

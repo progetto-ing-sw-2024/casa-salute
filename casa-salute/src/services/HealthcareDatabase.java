@@ -1,7 +1,9 @@
 package services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import models.*;
 
 import java.io.File;
@@ -12,7 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class HealthcareDatabase {
-    private static HealthcareDatabase instance;
+    private static final HealthcareDatabase instance = new HealthcareDatabase();
 
     private String databaseDirectoryPath;
 
@@ -32,7 +34,6 @@ public class HealthcareDatabase {
 
     public void init(String databaseDirectoryPath) throws IOException {
         this.databaseDirectoryPath = databaseDirectoryPath;
-
         this.createDatabaseDirectory();
 
         File usersFile = new File(getUsersFilePath().toString());
@@ -42,12 +43,37 @@ public class HealthcareDatabase {
         File nursesFile = new File(getNursesFilePath().toString());
         File appointmentsFile = new File(getAppointmentsFilePath().toString());
 
-        usersFile.createNewFile();
-        clinicsFile.createNewFile();
-        patientsFile.createNewFile();
-        physiciansFile.createNewFile();
-        nursesFile.createNewFile();
-        appointmentsFile.createNewFile();
+        Object[] emptyArray = {};
+
+        if (!usersFile.exists()) {
+            usersFile.createNewFile();
+            this.save(emptyArray, getUsersFilePath());
+        }
+
+        if (!clinicsFile.exists()) {
+            clinicsFile.createNewFile();
+            this.save(emptyArray, getClinicsFilePath());
+        }
+
+        if (!patientsFile.exists()) {
+            patientsFile.createNewFile();
+            this.save(emptyArray, getPatientsFilePath());
+        }
+
+        if (!physiciansFile.exists()) {
+            physiciansFile.createNewFile();
+            this.save(emptyArray, getPhysiciansFilePath());
+        }
+
+        if (!nursesFile.exists()) {
+            nursesFile.createNewFile();
+            this.save(emptyArray, getNursesFilePath());
+        }
+
+        if (!appointmentsFile.exists()) {
+            appointmentsFile.createNewFile();
+            this.save(emptyArray, getAppointmentsFilePath());
+        }
     }
 
     public void load() throws IOException {
@@ -110,46 +136,51 @@ public class HealthcareDatabase {
     }
 
     private ArrayList<User> loadUsers() throws IOException {
-        var usersFilePath = getUsersFilePath();
-        ArrayList<User> users = this.load(usersFilePath);
+        var filePath = getUsersFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<User> users = DeserializeList(fileContent, User.class);
         return users;
     }
 
     private ArrayList<Clinic> loadClinics() throws IOException {
-        var clinicsFilePath = getClinicsFilePath();
-        ArrayList<Clinic> clinics = this.<Clinic>load(clinicsFilePath);
+        var filePath = getClinicsFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<Clinic> clinics = DeserializeList(fileContent, Clinic.class);
         return clinics;
     }
 
     private ArrayList<Patient> loadPatients() throws IOException {
-        var patientsFilePath = getPatientsFilePath();
-        ArrayList<Patient> patients = this.<Patient>load(patientsFilePath);
+        var filePath = getPatientsFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<Patient> patients = DeserializeList(fileContent, Patient.class);
         return patients;
     }
 
     private ArrayList<Physician> loadPhysicians() throws IOException {
-        var physiciansFilePath = getPhysiciansFilePath();
-        ArrayList<Physician> physicians = this.<Physician>load(physiciansFilePath);
+        var filePath = getPhysiciansFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<Physician> physicians = DeserializeList(fileContent, Physician.class);
         return physicians;
     }
 
     private ArrayList<Nurse> loadNurses() throws IOException {
-        var nursesFilePath = getNursesFilePath();
-        ArrayList<Nurse> nurses = this.<Nurse>load(nursesFilePath);
+        var filePath = getNursesFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<Nurse> nurses = DeserializeList(fileContent, Nurse.class);
         return nurses;
     }
 
     private ArrayList<Appointment> loadAppointments() throws IOException {
-        var appointmentsFilePath = getAppointmentsFilePath();
-        ArrayList<Appointment> appointments = this.<Appointment>load(appointmentsFilePath);
+        var filePath = getAppointmentsFilePath();
+        String fileContent = Files.readString(filePath);
+        ArrayList<Appointment> appointments = DeserializeList(fileContent, Appointment.class);
         return appointments;
     }
 
-    private <T> ArrayList<T> load(Path filePath) throws IOException {
-        String fileContent = Files.readString(filePath);
+    private <T> ArrayList<T> DeserializeList(String json, Class<T> genericClass) throws IOException {
         ObjectMapper objMapper = new ObjectMapper();
-        var rf = new TypeReference<ArrayList<T>>() {};
-        ArrayList<T> result = objMapper.readValue(fileContent, rf);
+        CollectionType ct = objMapper.getTypeFactory().constructCollectionType(ArrayList.class, genericClass);
+        ArrayList<T> result = objMapper.readValue(json, ct);
         return result;
     }
 
