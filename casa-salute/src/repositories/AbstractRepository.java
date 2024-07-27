@@ -43,6 +43,7 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         }
 
         // lazy update:
+        data.setId(id);
         Remove(id);
         Add(id, data);
     }
