@@ -1,3 +1,5 @@
+package services;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.*;
@@ -8,30 +10,39 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class Database {
-    private final String databaseDirectoryPath;
+public class HealthcareDatabase {
+    private static HealthcareDatabase instance;
 
-    private ArrayList<Clinic> clinics = new ArrayList<>();
-    private ArrayList<Patient> patients = new ArrayList<>();
-    private ArrayList<Physician> physicians = new ArrayList<>();
-    private ArrayList<Nurse> nurses = new ArrayList<>();
-    private ArrayList<Appointment> appointments = new ArrayList<>();
+    private String databaseDirectoryPath;
 
-    public Database(String databaseDirectoryPath) {
-        this.databaseDirectoryPath = databaseDirectoryPath;
+    public ArrayList<User> users = new ArrayList<>();
+    public ArrayList<Clinic> clinics = new ArrayList<>();
+    public ArrayList<Patient> patients = new ArrayList<>();
+    public ArrayList<Physician> physicians = new ArrayList<>();
+    public ArrayList<Nurse> nurses = new ArrayList<>();
+    public ArrayList<Appointment> appointments = new ArrayList<>();
+
+    private HealthcareDatabase() {
     }
 
-    public void init() throws IOException {
+    public static HealthcareDatabase GetInstance() {
+        return HealthcareDatabase.instance;
+    }
+
+    public void init(String databaseDirectoryPath) throws IOException {
+        this.databaseDirectoryPath = databaseDirectoryPath;
+
         this.createDatabaseDirectory();
 
+        File usersFile = new File(getUsersFilePath().toString());
         File clinicsFile = new File(getClinicsFilePath().toString());
         File patientsFile = new File(getPatientsFilePath().toString());
         File physiciansFile = new File(getPhysiciansFilePath().toString());
         File nursesFile = new File(getNursesFilePath().toString());
         File appointmentsFile = new File(getAppointmentsFilePath().toString());
 
+        usersFile.createNewFile();
         clinicsFile.createNewFile();
         patientsFile.createNewFile();
         physiciansFile.createNewFile();
@@ -40,6 +51,7 @@ public class Database {
     }
 
     public void load() throws IOException {
+        this.users = this.loadUsers();
         this.clinics = this.loadClinics();
         this.patients = this.loadPatients();
         this.physicians = this.loadPhysicians();
@@ -48,6 +60,7 @@ public class Database {
     }
 
     public void save() throws IOException {
+        this.saveUsers();
         this.saveClinics();
         this.savePatients();
         this.savePhysicians();
@@ -58,6 +71,11 @@ public class Database {
     private void createDatabaseDirectory() throws IOException {
         Path path = Paths.get(this.databaseDirectoryPath);
         Files.createDirectories(path);
+    }
+
+    private void saveUsers() throws IOException {
+        var usersFilePath = getUsersFilePath();
+        this.save(this.users, usersFilePath);
     }
 
     private void saveClinics() throws IOException {
@@ -89,6 +107,12 @@ public class Database {
         ObjectMapper objMapper = new ObjectMapper();
         String json = objMapper.writeValueAsString(data);
         Files.writeString(filePath, json);
+    }
+
+    private ArrayList<User> loadUsers() throws IOException {
+        var usersFilePath = getUsersFilePath();
+        ArrayList<User> users = this.load(usersFilePath);
+        return users;
     }
 
     private ArrayList<Clinic> loadClinics() throws IOException {
@@ -127,6 +151,10 @@ public class Database {
         var rf = new TypeReference<ArrayList<T>>() {};
         ArrayList<T> result = objMapper.readValue(fileContent, rf);
         return result;
+    }
+
+    private Path getUsersFilePath() {
+        return Paths.get(databaseDirectoryPath, "users.json");
     }
 
     private Path getAppointmentsFilePath() {

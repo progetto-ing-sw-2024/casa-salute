@@ -1,3 +1,5 @@
+import services.HealthcareDatabase;
+
 import java.io.IOException;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -14,8 +16,8 @@ public class Main {
             System.out.println("i = " + i);
         }
 
-        Database db = new Database("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database");
-        db.init();
+        HealthcareDatabase db = HealthcareDatabase.GetInstance();
+        db.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database");
         db.load();
         db.save();
     }
