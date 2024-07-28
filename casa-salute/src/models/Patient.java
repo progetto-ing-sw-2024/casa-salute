@@ -2,7 +2,6 @@ package models;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 
 public class Patient implements UniqueResource {
@@ -14,7 +13,7 @@ public class Patient implements UniqueResource {
     private String taxCode;
     private String email;
     private UUID physicianId;
-    private ArrayList<UUID> supervisedUsersId = new ArrayList<UUID>();
+    private final ArrayList<UUID> supervisedUsersId = new ArrayList<UUID>();
 
     public UUID getId() {
         return id;

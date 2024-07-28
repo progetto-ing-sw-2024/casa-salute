@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class PhysiciansRepository extends AbstractRepository<Physician> {
     private final PersistentStateManager persistentStateManager;
 
-    public PhysiciansRepository(PersistentStateManager persistentStateManager){
+    public PhysiciansRepository(PersistentStateManager persistentStateManager) {
         this.persistentStateManager = persistentStateManager;
     }
 
