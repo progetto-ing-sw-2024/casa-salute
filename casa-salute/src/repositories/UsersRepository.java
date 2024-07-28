@@ -13,7 +13,7 @@ public class UsersRepository extends AbstractRepository<User> {
     }
 
     @Override
-    protected ArrayList<User> GetDataSource() {
+    protected ArrayList<User> getDataSource() {
         return persistentStateManager.users;
     }
 }

@@ -11,6 +11,7 @@ public class Appointment implements UniqueResource {
     private LocalDateTime appointmentDate;
     private Urgency urgengy;
     private String examinationResult;
+    private String notes;
 
     @Override
     public UUID getId() {
@@ -68,5 +69,13 @@ public class Appointment implements UniqueResource {
 
     public void setExaminationResult(String examinationResult) {
         this.examinationResult = examinationResult;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

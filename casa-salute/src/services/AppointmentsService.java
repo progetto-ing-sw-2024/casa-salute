@@ -1,18 +1,18 @@
 package services;
 
-import models.Appointment;
-import models.Patient;
-import models.Physician;
-import models.Urgency;
+import models.*;
 import repositories.AppointmentsRepository;
 import repositories.ClinicsRepository;
 import repositories.PatientsRepository;
 import repositories.PhysiciansRepository;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class AppointmentsService {
@@ -72,17 +72,48 @@ public class AppointmentsService {
         // check physician availability on given date
 
         // check if there's any clinic available
-        var clinicId = UUID.randomUUID(); // use random id for now
+        ClinicType clinicType = isPediatricPatient
+                ? ClinicType.Pediatrician
+                : ClinicType.Physician;
 
-        Appointment appointment = new Appointment();
+        Clinic clinic = findAnyAvailableClinic(clinicType, appointmentDateTime);
+        if (clinic == null) throw new IllegalArgumentException();
+
+        Appointment appointment = createAppointment(patient, physician, clinic, appointmentDateTime);
+
+        appointmentsRepository.add(appointment);
+        persistentStateManager.save();
+    }
+
+
+
+    private Appointment createAppointment(Patient patient, Physician physician, Clinic clinic, LocalDateTime appointmentDateTime) {
+        var appointment = new Appointment();
         appointment.setId(UUID.randomUUID());
         appointment.setAppointmentDate(appointmentDateTime);
         appointment.setPatientId(patient.getId());
         appointment.setUrgengy(Urgency.Normal);
         appointment.setWorkerId(physician.getId());
-        appointment.setClinicId(clinicId);
+        appointment.setClinicId(clinic.getId());
 
-        appointmentsRepository.Add(appointment.getId(), appointment);
-        persistentStateManager.save();
+        return appointment;
+    }
+
+    private Clinic findAnyAvailableClinic(ClinicType clinicType, LocalDateTime appointmentDateTime) {
+        List<Clinic> clinics = clinicsRepository.getAll(clinic -> clinic.getClinicType().equals(clinicType));
+        List<Clinic> availableClinics = clinics.stream().filter(clinic -> isClinicAvailable(clinic, appointmentDateTime)).toList();
+
+        if (availableClinics.isEmpty()) {
+            return null;
+        }
+
+        Clinic clinic = availableClinics.getFirst();
+        return clinic;
+    }
+
+    private boolean isClinicAvailable(Clinic clinic, LocalDateTime appointmentDateTime) {
+        // get all appointments with the same appointDateTime
+        // and check whether the given clinic is already taken
+        return true;
     }
 }

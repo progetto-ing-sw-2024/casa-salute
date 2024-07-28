@@ -4,6 +4,7 @@ import models.Clinic;
 import services.PersistentStateManager;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 public class ClinicsRepository extends AbstractRepository<Clinic> {
     private final PersistentStateManager persistentStateManager;
@@ -13,7 +14,7 @@ public class ClinicsRepository extends AbstractRepository<Clinic> {
     }
 
     @Override
-    protected ArrayList<Clinic> GetDataSource() {
+    protected ArrayList<Clinic> getDataSource() {
         return persistentStateManager.clinics;
     }
 }

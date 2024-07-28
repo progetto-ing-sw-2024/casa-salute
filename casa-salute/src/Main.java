@@ -35,10 +35,10 @@ public class Main {
         physician1.setUserId(user1.getId());
 
         UsersRepository usersRepository = new UsersRepository(psm);
-        usersRepository.Add(user1.getId(), user1);
+        usersRepository.add(user1.getId(), user1);
 
         PhysiciansRepository physiciansRepository = new PhysiciansRepository(psm);
-        physiciansRepository.Add(physician1.getId(), physician1);
+        physiciansRepository.add(physician1.getId(), physician1);
 
         psm.save();
     }

@@ -13,7 +13,7 @@ public class AppointmentsRepository extends AbstractRepository<Appointment> {
     }
 
     @Override
-    protected ArrayList<Appointment> GetDataSource() {
+    protected ArrayList<Appointment> getDataSource() {
         return persistentStateManager.appointments;
     }
 }

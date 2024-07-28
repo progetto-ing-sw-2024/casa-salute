@@ -13,7 +13,7 @@ public class PhysiciansRepository extends AbstractRepository<Physician> {
     }
 
     @Override
-    protected ArrayList<Physician> GetDataSource() {
+    protected ArrayList<Physician> getDataSource() {
         return persistentStateManager.physicians;
     }
 }

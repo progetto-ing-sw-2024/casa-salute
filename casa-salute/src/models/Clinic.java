@@ -15,4 +15,12 @@ public class Clinic implements UniqueResource {
     public void setId(UUID id) {
         this.id = id;
     }
+
+    public ClinicType getClinicType() {
+        return clinicType;
+    }
+
+    public void setClinicType(ClinicType clinicType) {
+        this.clinicType = clinicType;
+    }
 }
