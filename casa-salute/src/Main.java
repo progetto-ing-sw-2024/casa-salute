@@ -2,7 +2,7 @@ import models.Physician;
 import models.User;
 import repositories.PhysiciansRepository;
 import repositories.UsersRepository;
-import services.HealthcareDatabase;
+import services.PersistentStateManager;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -18,9 +18,9 @@ public class Main {
     }
 
     private static void test1() throws IOException {
-        HealthcareDatabase db = HealthcareDatabase.GetInstance();
-        db.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
-        db.load();
+        PersistentStateManager psm = PersistentStateManager.GetInstance();
+        psm.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
+        psm.load();
 
         User user1 = new User();
         user1.setUsername("user1");
@@ -34,12 +34,12 @@ public class Main {
         physician1.setTaxCode("SKYNKN81D19L781D");
         physician1.setUserId(user1.getId());
 
-        UsersRepository usersRepository = new UsersRepository(db);
+        UsersRepository usersRepository = new UsersRepository(psm);
         usersRepository.Add(user1.getId(), user1);
 
-        PhysiciansRepository physiciansRepository = new PhysiciansRepository(db);
+        PhysiciansRepository physiciansRepository = new PhysiciansRepository(psm);
         physiciansRepository.Add(physician1.getId(), physician1);
 
-        db.save();
+        psm.save();
     }
 }

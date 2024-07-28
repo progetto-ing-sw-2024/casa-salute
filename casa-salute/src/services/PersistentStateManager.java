@@ -1,7 +1,5 @@
 package services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import models.*;
@@ -13,8 +11,8 @@ import java.nio.file.Paths;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-public class HealthcareDatabase {
-    private static final HealthcareDatabase instance = new HealthcareDatabase();
+public class PersistentStateManager {
+    private static final PersistentStateManager instance = new PersistentStateManager();
 
     private String databaseDirectoryPath;
 
@@ -25,11 +23,11 @@ public class HealthcareDatabase {
     public ArrayList<Nurse> nurses = new ArrayList<>();
     public ArrayList<Appointment> appointments = new ArrayList<>();
 
-    private HealthcareDatabase() {
+    private PersistentStateManager() {
     }
 
-    public static HealthcareDatabase GetInstance() {
-        return HealthcareDatabase.instance;
+    public static PersistentStateManager GetInstance() {
+        return PersistentStateManager.instance;
     }
 
     public void init(String databaseDirectoryPath) throws IOException {

@@ -9,7 +9,7 @@ public class Physician implements UniqueResource {
     private String name;
     private String surname;
     private String taxCode;
-    private ArrayList<Object> specialties;
+    private ArrayList<String> specialties = new ArrayList<>();
 
     @Override
     public UUID getId() {

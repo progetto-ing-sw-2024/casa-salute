@@ -1,6 +1,5 @@
 package repositories;
 
-import models.Patient;
 import models.UniqueResource;
 
 import java.io.IOException;
@@ -8,7 +7,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public abstract class AbstractRepository<T extends UniqueResource> {
-    public T GetById(UUID id) {
+    public T getById(UUID id) {
         T result = this.GetDataSource()
                 .stream()
                 .filter(d -> d.getId() == id)
@@ -22,7 +21,7 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         if (id == null) throw new NullPointerException("id is null");
         if (data.getId() != null && data.getId() != id) throw new IllegalArgumentException();
 
-        T existingData = GetById(id);
+        T existingData = getById(id);
 
         if (existingData != null) {
             throw new IllegalArgumentException("id is used by another object");
@@ -36,7 +35,7 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         if (id == null) throw new NullPointerException("id is null");
         if (data.getId() != null && data.getId() != id) throw new IllegalArgumentException();
 
-        T existingData = GetById(id);
+        T existingData = getById(id);
 
         if (existingData == null) {
             throw new IllegalArgumentException("object not found");
@@ -51,7 +50,7 @@ public abstract class AbstractRepository<T extends UniqueResource> {
     public void Remove(UUID id) {
         if (id == null) throw new NullPointerException("id is null");
 
-        T data = GetById(id);
+        T data = getById(id);
 
         if (data != null) {
             GetDataSource().remove(data);

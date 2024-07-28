@@ -1,21 +1,19 @@
 package repositories;
 
 import models.Patient;
-import services.HealthcareDatabase;
+import services.PersistentStateManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class PatientsRepository extends AbstractRepository<Patient> {
-    private final HealthcareDatabase database;
+    private final PersistentStateManager persistentStateManager;
 
-    public PatientsRepository(HealthcareDatabase database){
-        this.database = database;
+    public PatientsRepository(PersistentStateManager persistentStateManager){
+        this.persistentStateManager = persistentStateManager;
     }
 
     @Override
     protected ArrayList<Patient> GetDataSource() {
-        return database.patients;
+        return persistentStateManager.patients;
     }
 }

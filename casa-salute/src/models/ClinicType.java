@@ -1,8 +1,9 @@
 package models;
 
 public enum ClinicType {
-    DoctorConsultation,
-    PediatricConsultation,
+    Physician,
+    Pediatrician,
     BloodSample,
-    Nursing
+    Nurse
+
 }
