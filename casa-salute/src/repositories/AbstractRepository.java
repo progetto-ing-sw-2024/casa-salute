@@ -24,6 +24,10 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         return new ArrayList<T>(this.getDataSource().stream().filter(filter).toList());
     }
 
+    public T get(Predicate<? super T> filter) {
+        return this.getDataSource().stream().filter(filter).findFirst().orElse(null);
+    }
+
     public void add(T data) throws IOException {
         if (data.getId() != null) throw new IllegalArgumentException();
 

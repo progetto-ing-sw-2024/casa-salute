@@ -1,19 +1,19 @@
 package repositories;
 
 import models.User;
-import services.PersistentStateManager;
+import services.PersistentDataService;
 
 import java.util.ArrayList;
 
 public class UsersRepository extends AbstractRepository<User> {
-    private final PersistentStateManager persistentStateManager;
+    private final PersistentDataService persistentDataService;
 
-    public UsersRepository(PersistentStateManager persistentStateManager) {
-        this.persistentStateManager = persistentStateManager;
+    public UsersRepository(PersistentDataService persistentDataService) {
+        this.persistentDataService = persistentDataService;
     }
 
     @Override
     protected ArrayList<User> getDataSource() {
-        return persistentStateManager.users;
+        return persistentDataService.users;
     }
 }

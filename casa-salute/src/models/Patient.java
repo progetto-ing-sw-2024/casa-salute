@@ -13,7 +13,8 @@ public class Patient implements UniqueResource {
     private String taxCode;
     private String email;
     private UUID physicianId;
-    private final ArrayList<UUID> supervisedUsersId = new ArrayList<UUID>();
+    private final ArrayList<UUID> supervisorPatientsId = new ArrayList<UUID>();
+    private UUID userId;
 
     public UUID getId() {
         return id;
@@ -77,5 +78,17 @@ public class Patient implements UniqueResource {
 
     public void setPhysicianId(UUID physicianId) {
         this.physicianId = physicianId;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
+
+    public ArrayList<UUID> getSupervisorPatientsId() {
+        return supervisorPatientsId;
     }
 }

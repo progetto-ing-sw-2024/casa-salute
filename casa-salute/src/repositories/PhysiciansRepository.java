@@ -1,19 +1,19 @@
 package repositories;
 
 import models.Physician;
-import services.PersistentStateManager;
+import services.PersistentDataService;
 
 import java.util.ArrayList;
 
 public class PhysiciansRepository extends AbstractRepository<Physician> {
-    private final PersistentStateManager persistentStateManager;
+    private final PersistentDataService persistentDataService;
 
-    public PhysiciansRepository(PersistentStateManager persistentStateManager) {
-        this.persistentStateManager = persistentStateManager;
+    public PhysiciansRepository(PersistentDataService persistentDataService) {
+        this.persistentDataService = persistentDataService;
     }
 
     @Override
     protected ArrayList<Physician> getDataSource() {
-        return persistentStateManager.physicians;
+        return persistentDataService.physicians;
     }
 }

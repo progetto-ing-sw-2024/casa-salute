@@ -1,39 +1,40 @@
 package services;
 
 import models.*;
-import repositories.AppointmentsRepository;
-import repositories.ClinicsRepository;
-import repositories.PatientsRepository;
-import repositories.PhysiciansRepository;
+import repositories.*;
 
 import java.io.IOException;
-import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class AppointmentsService {
-    private final PersistentStateManager persistentStateManager;
+    private final ApplicationStateManager applicationStateManager;
+    private final PersistentDataService persistentStateManager;
     private final AppointmentsRepository appointmentsRepository;
     private final PatientsRepository patientsRepository;
     private final PhysiciansRepository physiciansRepository;
     private final ClinicsRepository clinicsRepository;
+    private final UsersRepository usersRepository;
 
     public AppointmentsService(
-            PersistentStateManager persistentStateManager,
+            ApplicationStateManager applicationStateManager,
+            PersistentDataService persistentDataService,
             AppointmentsRepository appointmentsRepository,
             PatientsRepository patientsRepository,
             PhysiciansRepository physiciansRepository,
-            ClinicsRepository clinicsRepository
+            ClinicsRepository clinicsRepository,
+            UsersRepository usersRepository
     ) {
-        this.persistentStateManager = persistentStateManager;
+        this.applicationStateManager = applicationStateManager;
+        this.persistentStateManager = persistentDataService;
         this.appointmentsRepository = appointmentsRepository;
         this.patientsRepository = patientsRepository;
         this.physiciansRepository = physiciansRepository;
         this.clinicsRepository = clinicsRepository;
+        this.usersRepository = usersRepository;
     }
 
     public void bookPhysician(UUID patientId, UUID physicianId, LocalDateTime appointmentDateTime) throws IOException {
@@ -50,17 +51,23 @@ public class AppointmentsService {
         Physician physician = physiciansRepository.getById(physicianId);
         if (physician == null) throw new IllegalArgumentException();
 
-        Period diff = Period.between(patient.getBirthDate(), LocalDate.now());
-        boolean isPediatricPatient = diff.getYears() <= 13;
+        ClinicType clinicType = isPediatricPatient(patient) ? ClinicType.Pediatrician : ClinicType.Physician;
+        Clinic clinic = findAnyAvailableClinic(clinicType, appointmentDateTime);
+        if (clinic == null) throw new IllegalArgumentException();
 
-        if (isPediatricPatient) {
-            // todo
-            // check whether the logged in user is a supervisor of patientId
+        UUID loggedInUserId = applicationStateManager.getLoggedInUserId();
+        if (loggedInUserId == null) throw new IllegalArgumentException();
+
+        User loggedInUser = usersRepository.getById(loggedInUserId);
+        if (loggedInUser == null) throw new IllegalArgumentException();
+
+        if (!canUserAccessPatient(loggedInUser, patient)) {
+            throw new IllegalArgumentException();
         }
 
-        boolean isPatientPhysician = patient.getPhysicianId() == physician.getId();
+        boolean isPhysicianAssignedToPatient = patient.getPhysicianId() == physician.getId();
 
-        if (!isPatientPhysician) {
+        if (!isPhysicianAssignedToPatient) {
             // if it's not, check whether physicianId is the temporary substitute physician
             boolean isSubstitutePhysician = true;
 
@@ -72,12 +79,7 @@ public class AppointmentsService {
         // check physician availability on given date
 
         // check if there's any clinic available
-        ClinicType clinicType = isPediatricPatient
-                ? ClinicType.Pediatrician
-                : ClinicType.Physician;
 
-        Clinic clinic = findAnyAvailableClinic(clinicType, appointmentDateTime);
-        if (clinic == null) throw new IllegalArgumentException();
 
         Appointment appointment = createAppointment(patient, physician, clinic, appointmentDateTime);
 
@@ -85,7 +87,30 @@ public class AppointmentsService {
         persistentStateManager.save();
     }
 
+    private boolean canUserAccessPatient(User user, Patient patient) {
+        // A user is a supervisor of himself
+        if (patient.getUserId() == user.getId())
+            return true;
 
+        if (isPediatricPatient(patient)) {
+            Patient supervisor = patientsRepository.get(p -> p.getUserId() == user.getId());
+
+            if (supervisor == null)
+                return false;
+
+            boolean isSupervisor = patient.getSupervisorPatientsId().contains(supervisor.getId());
+            return isSupervisor;
+        }
+
+        return false;
+    }
+
+    private boolean isPediatricPatient(Patient patient) {
+        int ageLimit = 14;
+        Period diff = Period.between(patient.getBirthDate(), LocalDate.now());
+        boolean result = diff.getYears() < ageLimit;
+        return result;
+    }
 
     private Appointment createAppointment(Patient patient, Physician physician, Clinic clinic, LocalDateTime appointmentDateTime) {
         var appointment = new Appointment();

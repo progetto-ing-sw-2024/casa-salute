@@ -2,7 +2,7 @@ import models.Physician;
 import models.User;
 import repositories.PhysiciansRepository;
 import repositories.UsersRepository;
-import services.PersistentStateManager;
+import services.PersistentDataService;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class Main {
     }
 
     private static void test1() throws IOException {
-        PersistentStateManager psm = PersistentStateManager.GetInstance();
+        PersistentDataService psm = PersistentDataService.GetInstance();
         psm.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
         psm.load();
 

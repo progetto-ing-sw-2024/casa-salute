@@ -11,8 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class PersistentStateManager {
-    private static final PersistentStateManager instance = new PersistentStateManager();
+public class PersistentDataService {
+    private static final PersistentDataService instance = new PersistentDataService();
 
     private String databaseDirectoryPath;
 
@@ -23,11 +23,11 @@ public class PersistentStateManager {
     public ArrayList<Nurse> nurses = new ArrayList<>();
     public ArrayList<Appointment> appointments = new ArrayList<>();
 
-    private PersistentStateManager() {
+    private PersistentDataService() {
     }
 
-    public static PersistentStateManager GetInstance() {
-        return PersistentStateManager.instance;
+    public static PersistentDataService GetInstance() {
+        return PersistentDataService.instance;
     }
 
     public void init(String databaseDirectoryPath) throws IOException {

@@ -1,19 +1,19 @@
 package repositories;
 
 import models.Appointment;
-import services.PersistentStateManager;
+import services.PersistentDataService;
 
 import java.util.ArrayList;
 
 public class AppointmentsRepository extends AbstractRepository<Appointment> {
-    private final PersistentStateManager persistentStateManager;
+    private final PersistentDataService persistentDataService;
 
-    public AppointmentsRepository(PersistentStateManager persistentStateManager) {
-        this.persistentStateManager = persistentStateManager;
+    public AppointmentsRepository(PersistentDataService persistentDataService) {
+        this.persistentDataService = persistentDataService;
     }
 
     @Override
     protected ArrayList<Appointment> getDataSource() {
-        return persistentStateManager.appointments;
+        return persistentDataService.appointments;
     }
 }
