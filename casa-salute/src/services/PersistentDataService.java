@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PersistentDataService {
     private static final PersistentDataService instance = new PersistentDataService();
@@ -22,6 +23,7 @@ public class PersistentDataService {
     public ArrayList<Physician> physicians = new ArrayList<>();
     public ArrayList<Nurse> nurses = new ArrayList<>();
     public ArrayList<Appointment> appointments = new ArrayList<>();
+    public ArrayList<HealthcareWorker> healthcareWorkers = new ArrayList<>();
 
     private PersistentDataService() {
     }
@@ -40,47 +42,47 @@ public class PersistentDataService {
         File physiciansFile = new File(getPhysiciansFilePath().toString());
         File nursesFile = new File(getNursesFilePath().toString());
         File appointmentsFile = new File(getAppointmentsFilePath().toString());
-
-        Object[] emptyArray = {};
+        File healtcareWorkersFile = new File(getHealtcareWorkersFilePath().toString());
 
         if (!usersFile.exists()) {
-            usersFile.createNewFile();
-            this.save(emptyArray, getUsersFilePath());
+            saveUsers();
         }
 
         if (!clinicsFile.exists()) {
-            clinicsFile.createNewFile();
-            this.save(emptyArray, getClinicsFilePath());
+            saveClinics();
         }
 
         if (!patientsFile.exists()) {
-            patientsFile.createNewFile();
-            this.save(emptyArray, getPatientsFilePath());
+            savePatients();
         }
 
         if (!physiciansFile.exists()) {
-            physiciansFile.createNewFile();
-            this.save(emptyArray, getPhysiciansFilePath());
+            savePhysicians();
         }
 
         if (!nursesFile.exists()) {
-            nursesFile.createNewFile();
-            this.save(emptyArray, getNursesFilePath());
+            saveNurses();
         }
 
         if (!appointmentsFile.exists()) {
-            appointmentsFile.createNewFile();
-            this.save(emptyArray, getAppointmentsFilePath());
+            saveAppointments();
         }
+
+        if (!healtcareWorkersFile.exists()) {
+            saveHealtcareWorkers();
+        }
+
+        load();
     }
 
-    public void load() throws IOException {
+    private void load() throws IOException {
         this.users = this.loadUsers();
         this.clinics = this.loadClinics();
         this.patients = this.loadPatients();
         this.physicians = this.loadPhysicians();
         this.nurses = this.loadNurses();
         this.appointments = this.loadAppointments();
+        this.healthcareWorkers = this.loadHealthcareWorkers();
     }
 
     public void save() throws IOException {
@@ -90,6 +92,7 @@ public class PersistentDataService {
         this.savePhysicians();
         this.saveNurses();
         this.saveAppointments();
+        this.saveHealtcareWorkers();
     }
 
     private void createDatabaseDirectory() throws IOException {
@@ -97,82 +100,91 @@ public class PersistentDataService {
         Files.createDirectories(path);
     }
 
-    private void saveUsers() throws IOException {
-        var usersFilePath = getUsersFilePath();
-        this.save(this.users, usersFilePath);
-    }
+    private <T> void writeFile(List<T> data, Path filePath) throws IOException {
+        File file = filePath.toFile();
+        if (!file.exists()) {
+            file.createNewFile();
+        }
 
-    private void saveClinics() throws IOException {
-        var clinicsFilePath = getClinicsFilePath();
-        this.save(this.clinics, clinicsFilePath);
-    }
-
-    private void savePatients() throws IOException {
-        var patientsFilePath = getPatientsFilePath();
-        this.save(this.patients, patientsFilePath);
-    }
-
-    private void savePhysicians() throws IOException {
-        var physiciansFilePath = getPhysiciansFilePath();
-        this.save(this.physicians, physiciansFilePath);
-    }
-
-    private void saveNurses() throws IOException {
-        var nursesFilePath = getNursesFilePath();
-        this.save(this.nurses, nursesFilePath);
-    }
-
-    private void saveAppointments() throws IOException {
-        var appointmentsFilePath = getAppointmentsFilePath();
-        this.save(this.appointments, appointmentsFilePath);
-    }
-
-    private void save(Object data, Path filePath) throws IOException {
         ObjectMapper objMapper = new ObjectMapper();
         String json = objMapper.writeValueAsString(data);
         Files.writeString(filePath, json);
     }
 
+    private <T> ArrayList<T> readFile(Path filePath, Class<T> elementClass) throws IOException {
+        String fileContent = Files.readString(filePath);
+        ArrayList<T> data = DeserializeList(fileContent, elementClass);
+        return data;
+    }
+
+    private void saveUsers() throws IOException {
+        var usersFilePath = getUsersFilePath();
+        this.writeFile(this.users, usersFilePath);
+    }
+
+    private void saveClinics() throws IOException {
+        var clinicsFilePath = getClinicsFilePath();
+        this.writeFile(this.clinics, clinicsFilePath);
+    }
+
+    private void savePatients() throws IOException {
+        var patientsFilePath = getPatientsFilePath();
+        this.writeFile(this.patients, patientsFilePath);
+    }
+
+    private void savePhysicians() throws IOException {
+        var physiciansFilePath = getPhysiciansFilePath();
+        this.writeFile(this.physicians, physiciansFilePath);
+    }
+
+    private void saveNurses() throws IOException {
+        var nursesFilePath = getNursesFilePath();
+        this.writeFile(this.nurses, nursesFilePath);
+    }
+
+    private void saveAppointments() throws IOException {
+        var appointmentsFilePath = getAppointmentsFilePath();
+        this.writeFile(this.appointments, appointmentsFilePath);
+    }
+
+    private void saveHealtcareWorkers() throws IOException {
+        var healtcareWorkersFilePath = getHealtcareWorkersFilePath();
+        this.writeFile(this.healthcareWorkers, healtcareWorkersFilePath);
+    }
+
     private ArrayList<User> loadUsers() throws IOException {
         var filePath = getUsersFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<User> users = DeserializeList(fileContent, User.class);
-        return users;
+        return readFile(filePath, User.class);
     }
 
     private ArrayList<Clinic> loadClinics() throws IOException {
         var filePath = getClinicsFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<Clinic> clinics = DeserializeList(fileContent, Clinic.class);
-        return clinics;
+        return readFile(filePath, Clinic.class);
     }
 
     private ArrayList<Patient> loadPatients() throws IOException {
         var filePath = getPatientsFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<Patient> patients = DeserializeList(fileContent, Patient.class);
-        return patients;
+        return readFile(filePath, Patient.class);
     }
 
     private ArrayList<Physician> loadPhysicians() throws IOException {
         var filePath = getPhysiciansFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<Physician> physicians = DeserializeList(fileContent, Physician.class);
-        return physicians;
+        return readFile(filePath, Physician.class);
     }
 
     private ArrayList<Nurse> loadNurses() throws IOException {
         var filePath = getNursesFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<Nurse> nurses = DeserializeList(fileContent, Nurse.class);
-        return nurses;
+        return readFile(filePath, Nurse.class);
     }
 
     private ArrayList<Appointment> loadAppointments() throws IOException {
         var filePath = getAppointmentsFilePath();
-        String fileContent = Files.readString(filePath);
-        ArrayList<Appointment> appointments = DeserializeList(fileContent, Appointment.class);
-        return appointments;
+        return readFile(filePath, Appointment.class);
+    }
+
+    private ArrayList<HealthcareWorker> loadHealthcareWorkers() throws IOException {
+        var filePath = getHealtcareWorkersFilePath();
+        return readFile(filePath, HealthcareWorker.class);
     }
 
     private <T> ArrayList<T> DeserializeList(String json, Class<T> genericClass) throws IOException {
@@ -204,5 +216,9 @@ public class PersistentDataService {
 
     private Path getClinicsFilePath() {
         return Paths.get(databaseDirectoryPath, "clinics.json");
+    }
+
+    private Path getHealtcareWorkersFilePath() {
+        return Paths.get(databaseDirectoryPath, "healtcareWorkers.json");
     }
 }

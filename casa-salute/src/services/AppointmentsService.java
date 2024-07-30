@@ -18,6 +18,7 @@ public class AppointmentsService {
     private final PhysiciansRepository physiciansRepository;
     private final ClinicsRepository clinicsRepository;
     private final UsersRepository usersRepository;
+    private final HealthcareWorkerRepository healthcareWorkerRepository;
 
     public AppointmentsService(
             ApplicationStateManager applicationStateManager,
@@ -26,7 +27,8 @@ public class AppointmentsService {
             PatientsRepository patientsRepository,
             PhysiciansRepository physiciansRepository,
             ClinicsRepository clinicsRepository,
-            UsersRepository usersRepository
+            UsersRepository usersRepository,
+            HealthcareWorkerRepository healthcareWorkerRepository
     ) {
         this.applicationStateManager = applicationStateManager;
         this.persistentStateManager = persistentDataService;
@@ -35,21 +37,26 @@ public class AppointmentsService {
         this.physiciansRepository = physiciansRepository;
         this.clinicsRepository = clinicsRepository;
         this.usersRepository = usersRepository;
+        this.healthcareWorkerRepository = healthcareWorkerRepository;
     }
 
-    public void bookPhysician(UUID patientId, UUID physicianId, LocalDateTime appointmentDateTime) throws IOException {
+    public void bookPhysician(UUID patientId, UUID healthcareWorkerId, LocalDateTime appointmentDateTime) throws IOException {
         // https://stackoverflow.com/questions/32437550/whats-the-difference-between-instant-and-localdatetime
 
         if (patientId == null) throw new IllegalArgumentException();
-        if (physicianId == null) throw new IllegalArgumentException();
+        if (healthcareWorkerId == null) throw new IllegalArgumentException();
         if (appointmentDateTime == null) throw new IllegalArgumentException();
         if (appointmentDateTime.isBefore(LocalDateTime.now())) throw new IllegalArgumentException();
 
         Patient patient = patientsRepository.getById(patientId);
         if (patient == null) throw new IllegalArgumentException();
 
-        Physician physician = physiciansRepository.getById(physicianId);
-        if (physician == null) throw new IllegalArgumentException();
+        HealthcareWorker healthcareWorker = healthcareWorkerRepository.getById(healthcareWorkerId);
+        if (healthcareWorker == null) throw new IllegalArgumentException();
+        if (healthcareWorker.getHealthcareWorkerRole() == null) throw new IllegalArgumentException();
+
+        //Physician physician = physiciansRepository.getById(healthcareWorkerId);
+        //if (physician == null) throw new IllegalArgumentException();
 
         ClinicType clinicType = isPediatricPatient(patient) ? ClinicType.Pediatrician : ClinicType.Physician;
         Clinic clinic = findAnyAvailableClinic(clinicType, appointmentDateTime);
@@ -65,15 +72,8 @@ public class AppointmentsService {
             throw new IllegalArgumentException();
         }
 
-        boolean isPhysicianAssignedToPatient = patient.getPhysicianId() == physician.getId();
-
-        if (!isPhysicianAssignedToPatient) {
-            // if it's not, check whether physicianId is the temporary substitute physician
-            boolean isSubstitutePhysician = true;
-
-            if (!isSubstitutePhysician) {
-                throw new IllegalArgumentException();
-            }
+        if (!canPhysicianWorkWithPatient(healthcareWorker, patient)) {
+            throw new IllegalArgumentException();
         }
 
         // check physician availability on given date
@@ -81,10 +81,42 @@ public class AppointmentsService {
         // check if there's any clinic available
 
 
-        Appointment appointment = createAppointment(patient, physician, clinic, appointmentDateTime);
+        Appointment appointment = createAppointment(patient, null, clinic, appointmentDateTime);
 
         appointmentsRepository.add(appointment);
         persistentStateManager.save();
+    }
+
+    private boolean canPhysicianWorkWithPatient(HealthcareWorker healthcareWorker, Patient patient) {
+        boolean isWorkerPediatrician = healthcareWorker.getHealthcareWorkerRole() == HealthcareWorkerRole.Pediatrician;
+
+        if (isPediatricPatient(patient) && !isWorkerPediatrician) {
+            return false;
+        }
+
+        if (!isPediatricPatient(patient) && isWorkerPediatrician) {
+            return false;
+        }
+
+        boolean isPhysicianAssignedToPatient = patient.getPhysicianId() == healthcareWorker.getId();
+
+        if (isPhysicianAssignedToPatient)
+            return true;
+
+
+        HealthcareWorker principalWorker = healthcareWorkerRepository.getById(patient.getPhysicianId());
+        HealthcareWorker substituteWorker = healthcareWorkerRepository.getById(healthcareWorker.getId());
+
+        if (isSubstituteWorker(principalWorker, substituteWorker)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isSubstituteWorker(HealthcareWorker principalWorker, HealthcareWorker substituteWorker) {
+        // Determines whether substituteWorker is a substitute of principalWorker
+        return true;
     }
 
     private boolean canUserAccessPatient(User user, Patient patient) {

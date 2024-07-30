@@ -81,5 +81,5 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         }
     }
 
-    protected abstract ArrayList<T> getDataSource();
+    protected abstract List<T> getDataSource();
 }

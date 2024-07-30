@@ -18,9 +18,8 @@ public class Main {
     }
 
     private static void test1() throws IOException {
-        PersistentDataService psm = PersistentDataService.GetInstance();
-        psm.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
-        psm.load();
+        PersistentDataService pds = PersistentDataService.GetInstance();
+        pds.init("C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\casa-salute-database-test-1");
 
         User user1 = new User();
         user1.setUsername("user1");
@@ -34,12 +33,12 @@ public class Main {
         physician1.setTaxCode("SKYNKN81D19L781D");
         physician1.setUserId(user1.getId());
 
-        UsersRepository usersRepository = new UsersRepository(psm);
+        UsersRepository usersRepository = new UsersRepository(pds);
         usersRepository.add(user1.getId(), user1);
 
-        PhysiciansRepository physiciansRepository = new PhysiciansRepository(psm);
+        PhysiciansRepository physiciansRepository = new PhysiciansRepository(pds);
         physiciansRepository.add(physician1.getId(), physician1);
 
-        psm.save();
+        pds.save();
     }
 }
