@@ -44,6 +44,10 @@ public class Patient implements UniqueResource {
         return birthdate;
     }
 
+    public void setBirthDate(String birthdate) {
+        this.birthdate = LocalDate.parse(birthdate);
+    }
+
     public void setBirthDate(LocalDate birthdate) {
         this.birthdate = birthdate;
     }

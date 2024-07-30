@@ -107,7 +107,7 @@ public class PersistentDataService {
         }
 
         ObjectMapper objMapper = new ObjectMapper();
-        String json = objMapper.writeValueAsString(data);
+        String json = objMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
         Files.writeString(filePath, json);
     }
 
