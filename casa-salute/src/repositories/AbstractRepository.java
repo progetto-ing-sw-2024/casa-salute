@@ -40,35 +40,18 @@ public abstract class AbstractRepository<T extends UniqueResource> {
         getDataSource().add(data);
     }
 
-    // this method will soon be deleted in favor of add(data)
-    public void add(UUID id, T data) throws IOException {
-        if (id == null) throw new NullPointerException("id is null");
-        if (data.getId() != null && data.getId() != id) throw new IllegalArgumentException();
+    public void update(T data) throws IOException {
+        if (data.getId() == null) throw new NullPointerException("id is null");
 
-        T existingData = getById(id);
-
-        if (existingData != null) {
-            throw new IllegalArgumentException("id is used by another object");
-        }
-
-        data.setId(id);
-        getDataSource().add(data);
-    }
-
-    public void update(UUID id, T data) throws IOException {
-        if (id == null) throw new NullPointerException("id is null");
-        if (data.getId() != null && data.getId() != id) throw new IllegalArgumentException();
-
-        T existingData = getById(id);
+        T existingData = getById(data.getId());
 
         if (existingData == null) {
             throw new IllegalArgumentException("object not found");
         }
 
         // lazy update:
-        data.setId(id);
-        remove(id);
-        add(id, data);
+        remove(data.getId());
+        add(data);
     }
 
     public void remove(UUID id) {
