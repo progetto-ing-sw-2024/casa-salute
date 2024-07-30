@@ -9,13 +9,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PersistentDataService {
-    private static final PersistentDataService instance = new PersistentDataService();
-
-    private String databaseDirectoryPath;
+    private final String baseDirectoryPath;
 
     public ArrayList<User> users = new ArrayList<>();
     public ArrayList<Clinic> clinics = new ArrayList<>();
@@ -25,64 +24,52 @@ public class PersistentDataService {
     public ArrayList<Appointment> appointments = new ArrayList<>();
     public ArrayList<HealthcareWorker> healthcareWorkers = new ArrayList<>();
 
-    private PersistentDataService() {
+    public PersistentDataService(String baseDirectoryPath) {
+        this.baseDirectoryPath = baseDirectoryPath;
+    }
+    public boolean exists() {
+        File creationLog = new File(getCreationLogFilePath().toString());
+        return creationLog.exists();
     }
 
-    public static PersistentDataService GetInstance() {
-        return PersistentDataService.instance;
-    }
-
-    public void init(String databaseDirectoryPath) throws IOException {
-        this.databaseDirectoryPath = databaseDirectoryPath;
+    public void setup() throws IOException {
         this.createDatabaseDirectory();
 
+        File creationLog = new File(getCreationLogFilePath().toString());
+        if (!creationLog.exists()) creationLog.createNewFile();
+
         File usersFile = new File(getUsersFilePath().toString());
+        if (!usersFile.exists()) saveUsers();
+
         File clinicsFile = new File(getClinicsFilePath().toString());
+        if (!clinicsFile.exists()) saveClinics();
+
         File patientsFile = new File(getPatientsFilePath().toString());
+        if (!patientsFile.exists()) savePatients();
+
         File physiciansFile = new File(getPhysiciansFilePath().toString());
+        if (!physiciansFile.exists()) savePhysicians();
+
         File nursesFile = new File(getNursesFilePath().toString());
+        if (!nursesFile.exists()) saveNurses();
+
         File appointmentsFile = new File(getAppointmentsFilePath().toString());
+        if (!appointmentsFile.exists()) saveAppointments();
+
         File healtcareWorkersFile = new File(getHealtcareWorkersFilePath().toString());
-
-        if (!usersFile.exists()) {
-            saveUsers();
-        }
-
-        if (!clinicsFile.exists()) {
-            saveClinics();
-        }
-
-        if (!patientsFile.exists()) {
-            savePatients();
-        }
-
-        if (!physiciansFile.exists()) {
-            savePhysicians();
-        }
-
-        if (!nursesFile.exists()) {
-            saveNurses();
-        }
-
-        if (!appointmentsFile.exists()) {
-            saveAppointments();
-        }
-
-        if (!healtcareWorkersFile.exists()) {
-            saveHealtcareWorkers();
-        }
+        if (!healtcareWorkersFile.exists()) saveHealtcareWorkers();
 
         load();
     }
 
     private void load() throws IOException {
-        this.users = this.loadUsers();
-        this.clinics = this.loadClinics();
-        this.patients = this.loadPatients();
-        this.physicians = this.loadPhysicians();
-        this.nurses = this.loadNurses();
-        this.appointments = this.loadAppointments();
-        this.healthcareWorkers = this.loadHealthcareWorkers();
+        this.users = loadUsers();
+        this.clinics = loadClinics();
+        this.patients = loadPatients();
+        this.physicians = loadPhysicians();
+        this.nurses = loadNurses();
+        this.appointments = loadAppointments();
+        this.healthcareWorkers = loadHealthcareWorkers();
     }
 
     public void save() throws IOException {
@@ -96,7 +83,7 @@ public class PersistentDataService {
     }
 
     private void createDatabaseDirectory() throws IOException {
-        Path path = Paths.get(this.databaseDirectoryPath);
+        Path path = Paths.get(this.baseDirectoryPath);
         Files.createDirectories(path);
     }
 
@@ -194,31 +181,35 @@ public class PersistentDataService {
         return result;
     }
 
+    private Path getCreationLogFilePath() {
+        return Paths.get(baseDirectoryPath, ".creation-log");
+    }
+
     private Path getUsersFilePath() {
-        return Paths.get(databaseDirectoryPath, "users.json");
+        return Paths.get(baseDirectoryPath, "users.json");
     }
 
     private Path getAppointmentsFilePath() {
-        return Paths.get(databaseDirectoryPath, "appointments.json");
+        return Paths.get(baseDirectoryPath, "appointments.json");
     }
 
     private Path getNursesFilePath() {
-        return Paths.get(databaseDirectoryPath, "nurses.json");
+        return Paths.get(baseDirectoryPath, "nurses.json");
     }
 
     private Path getPhysiciansFilePath() {
-        return Paths.get(databaseDirectoryPath, "physicians.json");
+        return Paths.get(baseDirectoryPath, "physicians.json");
     }
 
     private Path getPatientsFilePath() {
-        return Paths.get(databaseDirectoryPath, "patients.json");
+        return Paths.get(baseDirectoryPath, "patients.json");
     }
 
     private Path getClinicsFilePath() {
-        return Paths.get(databaseDirectoryPath, "clinics.json");
+        return Paths.get(baseDirectoryPath, "clinics.json");
     }
 
     private Path getHealtcareWorkersFilePath() {
-        return Paths.get(databaseDirectoryPath, "healtcareWorkers.json");
+        return Paths.get(baseDirectoryPath, "healtcareWorkers.json");
     }
 }

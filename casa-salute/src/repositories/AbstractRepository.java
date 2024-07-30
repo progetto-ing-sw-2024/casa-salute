@@ -29,7 +29,7 @@ public abstract class AbstractRepository<T extends UniqueResource> {
     }
 
     public void add(T data) throws IOException {
-        if (data.getId() != null) throw new IllegalArgumentException();
+        if (data.getId() == null) throw new IllegalArgumentException();
 
         T existingData = getById(data.getId());
 
