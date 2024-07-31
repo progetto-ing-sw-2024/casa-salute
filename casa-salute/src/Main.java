@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Clinic;
 import models.ClinicType;
 import models.Physician;
@@ -8,6 +9,8 @@ import repositories.UsersRepository;
 import services.PersistentDataService;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -17,8 +20,13 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         try {
-            baseDirectoryPath = "C:\\Users\\Manuel\\Documents\\manuel-documents\\c-sharp-projects\\univr\\";
-            productionDirectoryPath = Paths.get(baseDirectoryPath, "health-facility-data-prod").toString();
+            Path settingsFilePath = Paths.get(System.getProperty("user.dir"), "appsettings.json");
+            String json = Files.readString(settingsFilePath);
+            ObjectMapper objMapper = new ObjectMapper();
+            AppSettings settings = objMapper.readValue(json, AppSettings.class);
+
+            baseDirectoryPath = settings.getUserBaseDirectoryPath();
+            productionDirectoryPath = Paths.get(baseDirectoryPath, "data-health-facility").toString();
 
             boolean prod = true;
 
