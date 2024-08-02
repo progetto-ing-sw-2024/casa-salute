@@ -20,11 +20,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         try {
-            Path settingsFilePath = Paths.get(System.getProperty("user.dir"), "appsettings.json");
-            String json = Files.readString(settingsFilePath);
-            ObjectMapper objMapper = new ObjectMapper();
-            AppSettings settings = objMapper.readValue(json, AppSettings.class);
-
+            AppSettings settings = getAppSettings();
             baseDirectoryPath = settings.getUserBaseDirectoryPath();
             productionDirectoryPath = Paths.get(baseDirectoryPath, "data-health-facility").toString();
 
@@ -40,6 +36,14 @@ public class Main {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static AppSettings getAppSettings() throws IOException {
+        Path settingsFilePath = Paths.get(System.getProperty("user.dir"), "appsettings.json");
+        String json = Files.readString(settingsFilePath);
+        ObjectMapper objMapper = new ObjectMapper();
+        AppSettings settings = objMapper.readValue(json, AppSettings.class);
+        return settings;
     }
 
     private static void setupInitialData() throws IOException {
