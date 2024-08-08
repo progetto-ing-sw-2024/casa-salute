@@ -1,9 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
-import models.Clinic;
-import models.ClinicType;
-import models.Physician;
-import models.User;
+import models.*;
 import repositories.ClinicsRepository;
+import repositories.PatientsRepository;
 import repositories.PhysiciansRepository;
 import repositories.UsersRepository;
 import services.PersistentDataService;
@@ -118,5 +116,32 @@ public class Main {
         physiciansRepository.add(physician1);
 
         pds.save();
+    }
+
+    private static void test2() throws IOException {
+        var path = Paths.get(baseDirectoryPath, "health-facility-data-test-2").toString();
+
+
+        PersistentDataService pds = new PersistentDataService(path);
+        PatientsRepository patientsRepository = new PatientsRepository(pds);
+
+        Patient patient1 = new Patient();
+        patient1.setId(UUID.randomUUID());
+        patient1.setName("mario");
+        patient1.setSurname("rossi");
+        patient1.setEmail("mariorossi@gmail.com");
+
+        patientsRepository.add(patient1);
+
+        Patient patient2 = new Patient();
+        patient2.setId(UUID.randomUUID());
+        patient2.setName("luigi");
+        patient2.setSurname("verdi");
+        patient2.setEmail("luigiverdi@gmail.com");
+
+        patientsRepository.add(patient2);
+
+        pds.save();
+
     }
 }
